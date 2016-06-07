@@ -44,25 +44,24 @@
   </tr>
 </table>
 <script>
-  var textarea = document.querySelector('textarea'), 
-    outDiv = document.querySelector('div'),
-    newElement = document.createElement('div'), 
-    dd = new diffDOM();
+var textarea = document.querySelector('textarea'),
+  outDiv = document.querySelector('div'),
+  newElement = document.createElement('div'),
+  dd = new diffDOM();
 
-  textarea.addEventListener('input', function() {
-    newElement.innerHTML = textarea.value;
-    if (newElement.innerHTML != textarea.value) {
-      // The innerHTML had to be adjusted to take in the text area value. This means the HTML was invalid.
-      textarea.classList.remove('success');
-      textarea.classList.add('failure');
-      return false;
-    } else {
-      textarea.classList.add('success');
-      textarea.classList.remove('failure');
-    }
+textarea.addEventListener('input', function() {
+  newElement.innerHTML = textarea.value;
+  //当输入的内容可以被转为正确的html时
+  if (newElement.innerHTML == textarea.value) {
+    textarea.classList.add('success');
+    textarea.classList.remove('failure');
     dd.apply(outDiv, dd.diff(outDiv, newElement));
-    
-  }, false);
+  } else {
+    //当输入的内容不能被转化为html时
+    textarea.classList.remove('success');
+    textarea.classList.add('failure');
+  }
+}, false);
 </script>
 </body>
 </html>
