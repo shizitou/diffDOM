@@ -1,9 +1,6 @@
 (function() {
     "use strict";
-
-    var diffcount;
-
-    var Diff = function (options) {
+    var Diff = function(options) {
         var diff = this;
         Object.keys(options).forEach(function(option) {
             diff[option] = options[option];
@@ -14,38 +11,36 @@
         toString: function() {
             return JSON.stringify(this);
         }
-
-        // TODO: compress diff output by replacing these keys with numbers or alike:
-        /*        'addAttribute' = 0,
-                'modifyAttribute' = 1,
-                'removeAttribute' = 2,
-                'modifyTextElement' = 3,
-                'relocateGroup' = 4,
-                'removeElement' = 5,
-                'addElement' = 6,
-                'removeTextElement' = 7,
-                'addTextElement' = 8,
-                'replaceElement' = 9,
-                'modifyValue' = 10,
-                'modifyChecked' = 11,
-                'modifySelected' = 12,
-                'modifyComment' = 13,
-                'action' = 14,
-                'route' = 15,
-                'oldValue' = 16,
-                'newValue' = 17,
-                'element' = 18,
-                'group' = 19,
-                'from' = 20,
-                'to' = 21,
-                'name' = 22,
-                'value' = 23,
-                'data' = 24,
-                'attributes' = 25,
-                'nodeName' = 26,
-                'childNodes' = 27,
-                'checked' = 28,
-                'selected' = 29;*/
+        /*  'addAttribute' = 0,
+            'modifyAttribute' = 1,
+            'removeAttribute' = 2,
+            'modifyTextElement' = 3,
+            'relocateGroup' = 4,
+            'removeElement' = 5,
+            'addElement' = 6,
+            'removeTextElement' = 7,
+            'addTextElement' = 8,
+            'replaceElement' = 9,
+            'modifyValue' = 10,
+            'modifyChecked' = 11,
+            'modifySelected' = 12,
+            'modifyComment' = 13,
+            'action' = 14,
+            'route' = 15,
+            'oldValue' = 16,
+            'newValue' = 17,
+            'element' = 18,
+            'group' = 19,
+            'from' = 20,
+            'to' = 21,
+            'name' = 22,
+            'value' = 23,
+            'data' = 24,
+            'attributes' = 25,
+            'nodeName' = 26,
+            'childNodes' = 27,
+            'checked' = 28,
+            'selected' = 29;  */
     };
 
     var SubsetMapping = function SubsetMapping(a, b) {
@@ -179,10 +174,7 @@
         }
 
         return true;
-
     };
-
-
     var roughlyEqual = function(e1, e2, uniqueDescriptors, sameSiblings, preventRecursion) {
         var childUniqueDescriptors, nodeList1, nodeList2;
 
@@ -246,8 +238,6 @@
             });
         }
     };
-
-
     var cloneObj = function(obj) {
         //  TODO: Do we really need to clone here? Is it not enough to just return the original object?
         return JSON.parse(JSON.stringify(obj));
@@ -346,7 +336,6 @@
      *
      */
     var getGapInformation = function(t1, t2, stable) {
-
         var gaps1 = t1.childNodes ? makeArray(t1.childNodes.length, true) : [],
             gaps2 = t2.childNodes ? makeArray(t2.childNodes.length, true) : [],
             group = 0;
@@ -374,7 +363,6 @@
      * Find all matching subsets, based on immediate child differences only.
      */
     var markSubTrees = function(oldTree, newTree) {
-        // note: the child lists are views, and so update as we update old/newTree
         var oldChildren = oldTree.childNodes ? oldTree.childNodes : [],
             newChildren = newTree.childNodes ? newTree.childNodes : [],
             marked1 = makeArray(oldChildren.length, false),
@@ -388,32 +376,24 @@
                 marked1[subset.oldValue + i] = true;
                 marked2[subset.newValue + i] = true;
             };
-
         while (subset) {
             subset = findCommonSubsets(oldChildren, newChildren, marked1, marked2);
             if (subset) {
                 subsets.push(subset);
-
                 Array.apply(null, new Array(subset.length)).map(returnIndex).forEach(markBoth);
-
             }
         }
         return subsets;
     };
-
-
     function swap(obj, p1, p2) {
         (function(_) {
             obj[p1] = obj[p2];
             obj[p2] = _;
         }(obj[p1]));
     }
-
-
     var DiffTracker = function() {
         this.list = [];
     };
-
     DiffTracker.prototype = {
         list: false,
         add: function(diffs) {
@@ -426,12 +406,8 @@
             this.list.forEach(fn);
         }
     };
-
     var diffDOM = function(options) {
-
         var defaults = {
-                debug: false,
-                diffcap: 10, // Limit for how many diffs are accepting when debugging. Inactive when debug is false.
                 maxDepth: false, // False or a numeral. If set to a numeral, limits the level of depth that the the diff mechanism looks for differences. If false, goes through the entire tree.
                 valueDiffing: true, // Whether to take into consideration the values of forms that differ from auto assigned values (when a user fills out a form).
                 // syntax: textDiff: function (node, currentValue, expectedValue, newValue)
@@ -441,10 +417,10 @@
                 },
                 // empty functions were benchmarked as running faster than both
                 // `f && f()` and `if (f) { f(); }`
-                preVirtualDiffApply: function () {},
-                postVirtualDiffApply: function () {},
-                preDiffApply: function () {},
-                postDiffApply: function () {}
+                preVirtualDiffApply: function() {},
+                postVirtualDiffApply: function() {},
+                preDiffApply: function() {},
+                postDiffApply: function() {}
             },
             i;
 
@@ -459,37 +435,18 @@
                 this[i] = options[i];
             }
         }
-
     };
     diffDOM.prototype = {
-
-        // ===== Create a diff =====
-
         diff: function(t1Node, t2Node) {
-
+            //将节点转换成js对象
             var t1 = this.nodeToObj(t1Node),
                 t2 = this.nodeToObj(t2Node);
-
-            diffcount = 0;
-
-            if (this.debug) {
-                this.t1Orig = this.nodeToObj(t1Node);
-                this.t2Orig = this.nodeToObj(t2Node);
-            }
-
             this.tracker = new DiffTracker();
             return this.findDiffs(t1, t2);
         },
         findDiffs: function(t1, t2) {
             var diffs;
             do {
-                if (this.debug) {
-                    diffcount += 1;
-                    if (diffcount > this.diffcap) {
-                        window.diffError = [this.t1Orig, this.t2Orig];
-                        throw new Error("surpassed diffcap:" + JSON.stringify(this.t1Orig) + " -> " + JSON.stringify(this.t2Orig));
-                    }
-                }
                 diffs = this.findNextDiff(t1, t2, []);
                 if (diffs.length === 0) {
                     // Last check if the elements really are the same now.
@@ -510,10 +467,6 @@
         },
         findNextDiff: function(t1, t2, route) {
             var diffs;
-
-            if (this.maxDepth && route.length > this.maxDepth) {
-                return [];
-            }
             // outer differences?
             if (!t1.outerDone) {
                 diffs = this.findOuterDiff(t1, t2, route);
@@ -534,7 +487,7 @@
                 }
             }
 
-            if (this.valueDiffing && !t1.valueDone) {
+            if (!t1.valueDone) {
                 // value differences?
                 diffs = this.findValueDiff(t1, t2, route);
 
@@ -625,11 +578,15 @@
             return diffs;
         },
         nodeToObj: function(node) {
-            var objNode = {}, dobj = this;
+            var objNode = {},
+                dobj = this;
+            //节点名称
             objNode.nodeName = node.nodeName;
+            //文本,注释 节点
             if (objNode.nodeName === '#text' || objNode.nodeName === '#comment') {
                 objNode.data = node.data;
             } else {
+                // 保存节点的所有DOM属性
                 if (node.attributes && node.attributes.length > 0) {
                     objNode.attributes = {};
                     Array.prototype.slice.call(node.attributes).forEach(
@@ -638,6 +595,7 @@
                         }
                     );
                 }
+                //所有子节点的信息: name, attrs, childs
                 if (node.childNodes && node.childNodes.length > 0) {
                     objNode.childNodes = [];
                     Array.prototype.slice.call(node.childNodes).forEach(
@@ -646,6 +604,7 @@
                         }
                     );
                 }
+                //表单元素需要保存的一些DOM属性
                 if (this.valueDiffing) {
                     if (node.value !== undefined) {
                         objNode.value = node.value;
@@ -785,9 +744,7 @@
             }
             t1.innerDone = true;
             return diffs;
-
         },
-
         attemptGroupRelocation: function(t1, t2, subtrees, route) {
             /* Either t1.childNodes and t2.childNodes have the same length, or
              * there are at least two groups of similar elements can be found.
@@ -898,7 +855,6 @@
             }
             return diffs;
         },
-
         findValueDiff: function(t1, t2, route) {
             // Differences of value. Only useful if the value/selection/checked value
             // differs from what is represented in the DOM. For example in the case
@@ -933,9 +889,6 @@
 
             return diffs;
         },
-
-        // ===== Apply a virtual diff =====
-
         applyVirtual: function(tree, diffs) {
             var dobj = this;
             if (diffs.length === 0) {
@@ -971,14 +924,14 @@
                 parentNode = routeInfo.parentNode,
                 nodeIndex = routeInfo.nodeIndex,
                 newNode, route, c;
-
-            // pre-diff hook
             var info = {
                 diff: diff,
                 node: node
             };
 
-            if (this.preVirtualDiffApply(info)) { return true; }
+            if (this.preVirtualDiffApply(info)) {
+                return true;
+            }
 
             switch (diff.action) {
                 case 'addAttribute':
@@ -1110,12 +1063,6 @@
 
             return;
         },
-
-
-
-
-        // ===== Apply a diff =====
-
         apply: function(tree, diffs) {
             var dobj = this;
 
@@ -1144,14 +1091,14 @@
         applyDiff: function(tree, diff) {
             var node = this.getFromRoute(tree, diff.route),
                 newNode, reference, route, c;
-
-            // pre-diff hook
             var info = {
                 diff: diff,
                 node: node
             };
 
-            if (this.preDiffApply(info)) { return true; }
+            if (this.preDiffApply(info)) {
+                return true;
+            }
 
             switch (diff.action) {
                 case 'addAttribute':
@@ -1250,95 +1197,7 @@
             this.postDiffApply(info);
 
             return true;
-        },
-
-        // ===== Undo a diff =====
-
-        undo: function(tree, diffs) {
-            diffs = diffs.slice();
-            var dobj = this;
-            if (!diffs.length) {
-                diffs = [diffs];
-            }
-            diffs.reverse();
-            diffs.forEach(function(diff) {
-                dobj.undoDiff(tree, diff);
-            });
-        },
-        undoDiff: function(tree, diff) {
-
-            switch (diff.action) {
-                case 'addAttribute':
-                    diff.action = 'removeAttribute';
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'modifyAttribute':
-                    swap(diff, 'oldValue', 'newValue');
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'removeAttribute':
-                    diff.action = 'addAttribute';
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'modifyTextElement':
-                    swap(diff, 'oldValue', 'newValue');
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'modifyValue':
-                    swap(diff, 'oldValue', 'newValue');
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'modifyComment':
-                    swap(diff, 'oldValue', 'newValue');
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'modifyChecked':
-                    swap(diff, 'oldValue', 'newValue');
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'modifySelected':
-                    swap(diff, 'oldValue', 'newValue');
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'replaceElement':
-                    swap(diff, 'oldValue', 'newValue');
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'relocateGroup':
-                    swap(diff, 'from', 'to');
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'removeElement':
-                    diff.action = 'addElement';
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'addElement':
-                    diff.action = 'removeElement';
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'removeTextElement':
-                    diff.action = 'addTextElement';
-                    this.applyDiff(tree, diff);
-                    break;
-                case 'addTextElement':
-                    diff.action = 'removeTextElement';
-                    this.applyDiff(tree, diff);
-                    break;
-                default:
-                    console.log('unknown action');
-            }
-
         }
     };
-
-    if (typeof exports !== 'undefined') {
-        if (typeof module !== 'undefined' && module.exports) {
-            exports = module.exports = diffDOM;
-        }
-        exports.diffDOM = diffDOM;
-    } else {
-        // `window` in the browser, or `exports` on the server
-        this.diffDOM = diffDOM;
-    }
-
+    this.diffDOM = diffDOM;
 }.call(this));
